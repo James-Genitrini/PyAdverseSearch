@@ -93,8 +93,15 @@ class NegamaxSolver:
         if not node.children:
             node._expand()
 
+        # Move Ordering
+        sorted_children = sorted(
+            node.children,
+            key = lambda child: child.valuation * color,
+            reverse = True
+        )
+
         value = -float('inf')
-        for child in node.children:
+        for child in sorted_children:
             score = -self._negamax(child, depth - 1, -beta, -alpha, -color)
             value = max(value, score)
             alpha = max(alpha, value)
@@ -128,7 +135,7 @@ class NegamaxSolver:
         actions = node.state._possible_actions()
         captures = [a for a in actions if getattr(a, 'is_capture', False)]
         
-        for actions in captures:
+        for action in captures:
             new_state = node.state._apply_action(action)
             child_node = Node(state=new_state, parent=node, depth=node.depth + 1)
             
