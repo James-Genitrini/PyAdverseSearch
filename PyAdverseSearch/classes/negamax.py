@@ -1,70 +1,142 @@
 class NegamaxSolver:
+    """
+    Solveur basé sur l'algorithme Negamax avec élagage Alpha-Beta, 
+    recherche de quiescence et table de transposition.
+    
+    Cette variante simplifiée du Minimax repose sur l'égalité : max(a, b) == -min(-a, -b).
+    Elle permet de traiter les deux joueurs avec la même logique de maximisation.
+    """
+    
     def __init__(self, depth_limit=5):
+        """
+        Initialise le solveur avec une limite de profondeur de recherche.
+        
+        :param depth_limit: Profondeur maximale de l'arbre de recherche (nombre de demi-coups).
+        """
         self.depth_limit = depth_limit
         self.transposition_table = {}
-        self.nodes_visited = 0
 
-    def solve(self, game, state, color):
-        self.transposition_table = {}
-        self.nodes_visited = 0
-        return self._negamax(game, state, self.depth_limit, -float('inf'), float('inf'), color)
 
-    def _negamax(self, game, state, depth, alpha, beta, color):
-        self.nodes_visited += 1
+
+    def get_best_move(self, root_node):
+        """
+        Analyse la racine du jeu et retourne l'état (board) résultant du meilleur coup possible.
         
-        state_key = state.get_hash()
-        if state_key in self.transposition_table:
-            entry = self.transposition_table[state_key]
+        Cette fonction amorce la récursion en explorant les enfants directs de la racine 
+        et en sélectionnant celui qui offre le score Negamax le plus élevé.
+        
+        :param root_node: Instance de Node représentant l'état actuel du jeu.
+        :return: Le plateau (board) correspondant au meilleur coup trouvé.
+        """
+        best_value = -float('inf')
+        best_action = None
+        
+        if not root_node.children:
+            root_node._expand()
+            
+        for child in root_node.children:
+            # On cherche pour l'adversaire (color = -1)
+            # On suppose ici que la racine est toujours pour MAX (color 1)
+            value = -self._negamax(child, self.depth_limit - 1, -float('inf'), float('inf'), -1)
+            
+            if value > best_value:
+                best_value = value
+                best_action = child.state.board 
+        
+        return best_action
+    
+    
+    
+    def solve(self, game, state, color):
+        """
+        Point d'entrée alternatif pour évaluer la valeur d'un état spécifique.
+        Réinitialise la table de transposition pour garantir une recherche fraîche.
+        
+        :param game: Instance de la classe Game.
+        :param state: L'état à évaluer.
+        :param color: 1 pour le joueur MAX, -1 pour le joueur MIN.
+        :return: Valeur numérique de l'état.
+        """
+        self.transposition_table = {}
+        
+        if state.game is None:
+            state.game = game
+            
+        root_node = Node(state=state, parent=None, depth=0)
+        
+        return self._negamax(root_node, self.depth_limit, -float('inf'), float('inf'), color)
+
+
+    def _negamax(self, node, depth, alpha, beta, color):
+        """
+        Fonction récursive principale implémentant Negamax avec élagage Alpha-Beta.
+        
+        :param node: Le nœud (Node) actuellement exploré.
+        :param depth: Profondeur restante à explorer.
+        :param alpha: Borne inférieure du score sécurisé par le joueur actuel.
+        :param beta: Borne supérieure du score que l'adversaire laissera au joueur actuel.
+        :param color: Multiplicateur de score (1 ou -1) pour normaliser l'évaluation.
+        :return: Le score évalué pour ce nœud du point de vue du joueur actuel.
+        """
+        state_hash = hash(str(node.state.board)) 
+        if state_hash in self.transposition_table:
+            entry = self.transposition_table[state_hash]
             if entry['depth'] >= depth:
                 return entry['value']
 
-        # 2. Cas terminaux
-        if game.game_is_terminal(state):
-            return color * game.game_utility(state)
+        if node.is_terminal():
+            return color * node.utility
 
         if depth == 0:
-            return self._quiescence(game, state, alpha, beta, color)
+            return self._quiescence(node, alpha, beta, color)
+
+        if not node.children:
+            node._expand()
 
         value = -float('inf')
-        
-        # 3. Exploration
-        for action in game.game_possible_actions(state):
-            next_state = state.apply_action(action)
-            score = -self._negamax(game, next_state, depth - 1, -beta, -alpha, -color)
-            
+        for child in node.children:
+            score = -self._negamax(child, depth - 1, -beta, -alpha, -color)
             value = max(value, score)
             alpha = max(alpha, value)
-            
             if alpha >= beta:
                 break
 
-        # 4. Sauvegarde
-        self.transposition_table[state_key] = {
-            'value': value,
-            'depth': depth
-        }
+        self.transposition_table[state_hash] = {'value': value, 'depth': depth}
         return value
-
-    def _quiescence(self, game, state, alpha, beta, color):
-        """Recherche calme pour éviter l'effet d'horizon."""
-        stand_pat = color * game.game_heuristic(state)
-
-        if stand_pat >= beta:
+    
+    
+    
+    def _quiescence(self, node, alpha, beta, color):
+        """
+        Recherche de 'calme' pour limiter l'effet d'horizon. 
+        Continue d'explorer uniquement les captures pour éviter les erreurs d'évaluation 
+        grossières sur le dernier coup.
+        
+        :param node: Le nœud à évaluer.
+        :param alpha/beta: Bornes d'élagage.
+        :param color: Direction de l'évaluation.
+        :return: Une évaluation stabilisée de la position.
+        """
+        stand_pat = color * node.valuation
+        
+        if stand_pat >= beta: 
             return beta
-        if alpha < stand_pat:
+        
+        if alpha < stand_pat: 
             alpha = stand_pat
 
-        # Filtre optionnel : ne tester que les actions "bruyantes" (captures)
-        actions = game.game_possible_actions(state)
+        actions = node.state._possible_actions()
         captures = [a for a in actions if getattr(a, 'is_capture', False)]
-
-        for action in captures:
-            next_state = state.apply_action(action)
-            score = -self._quiescence(game, next_state, -beta, -alpha, -color)
+        
+        for actions in captures:
+            new_state = node.state._apply_action(action)
+            child_node = Node(state=new_state, parent=node, depth=node.depth + 1)
+            
+            score = -self._quiescence(child_node, -beta, -alpha, -color)
             
             if score >= beta:
-                return beta
+                return beta 
             if score > alpha:
                 alpha = score
-        
+                
         return alpha
