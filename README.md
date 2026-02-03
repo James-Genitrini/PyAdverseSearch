@@ -424,3 +424,7 @@ PyAdverseSearch offre une infrastructure complète, flexible et performante pour
 Que vous soyez chercheur explorant de nouvelles techniques d'intelligence artificielle, étudiant apprenant les fondements de la théorie des jeux, ou développeur intégrant des capacités décisionnelles dans vos applications, PyAdverseSearch fournit les outils nécessaires pour concrétiser vos projets avec efficacité et élégance.
 
 Nous vous encourageons à explorer les exemples fournis, à expérimenter avec vos propres implémentations, et à contribuer au développement continu de cette bibliothèque au sein de la communauté PyAdverseSearch.
+
+## Étudiant-es ayant travaillé sur la librairie
+
+**2025** : Anaïs Dariane Nikiema, Martin Queval, Thibault Stouls, Hugo Vicente, Benjamin Bouquet, Ewan Burasovitch, Mathys Lohézic, Axel Ozange, Mélissa Djenadi
