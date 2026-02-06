@@ -55,7 +55,7 @@ def play_game(game_type):
     game = config['generator'](not human_starts)
     state = game.state
     solver = NegamaxSolver(depth_limit=config['depth'])
-    
+        
     ai_turn = not human_starts
 
     for move_num in range(1, config['max_moves'] + 1):
@@ -84,6 +84,7 @@ def play_game(game_type):
     print("\n--- GAME OVER ---")
     winner = game.winner_function(state)
     print(f"Result: {'Its a draw' if not winner else f'Winner is {winner}'}")
+
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+from PyAdverseSearch.classes.node import Node
+import random
+
 class NegamaxSolver:
     """
     Solveur basé sur l'algorithme Negamax avec élagage Alpha-Beta, 
@@ -17,7 +20,8 @@ class NegamaxSolver:
         self.depth_limit = depth_limit
         self.transposition_table = {}
 
-
+        self.nodes_visited = 0
+        self.cutoffs = 0
 
     def get_best_move(self, root_node):
         """
@@ -102,6 +106,8 @@ class NegamaxSolver:
         :return: Le score évalué pour ce nœud du point de vue du joueur actuel.
         """
         
+        self.nodes_visited += 1
+
         state_hash = hash(str(node.state.board)) 
         if state_hash in self.transposition_table:
             entry = self.transposition_table[state_hash]
@@ -119,11 +125,12 @@ class NegamaxSolver:
             return color * adjusted_utility
 
         if depth == 0 or node.is_terminal():
-            return self._quiescence(node.state, alpha, beta, color)
+            return self._quiescence(node, alpha, beta, color)
 
         if not node.children:
             node._expand()
 
+        # random.shuffle(node.children)
         node.children.sort(key=lambda n: self._get_move_score(n, color), reverse=True)
 
         value = -float('inf')
@@ -132,6 +139,7 @@ class NegamaxSolver:
             value = max(value, score)
             alpha = max(alpha, value)
             if alpha >= beta:
+                self.cutoffs += 1
                 break
 
         self.transposition_table[state_hash] = {'value': value, 'depth': depth}
@@ -139,7 +147,7 @@ class NegamaxSolver:
     
     
     
-    def _quiescence(self, state, alpha, beta, color):
+    def _quiescence(self, node, alpha, beta, color):
         """
         Recherche de 'calme' pour limiter l'effet d'horizon. 
         Continue d'explorer uniquement les captures pour éviter les erreurs d'évaluation 
@@ -151,8 +159,11 @@ class NegamaxSolver:
         :return: Une évaluation stabilisée de la position.
         """
         
-        stand_pat = color * state._evaluate()
-        
+        if hasattr(node.state, '_evaluate'):
+            stand_pat = color * node.state._evaluate()
+        else:
+            stand_pat = color * getattr(node.state, 'utility', 0)
+
         if stand_pat >= beta: 
             return beta
         
@@ -164,6 +175,7 @@ class NegamaxSolver:
             return alpha
 
         actions = node.state._possible_actions()
+        # random.shuffle(actions)
         captures = [a for a in actions if getattr(a, 'is_capture', False)]
         
         for action in captures:
