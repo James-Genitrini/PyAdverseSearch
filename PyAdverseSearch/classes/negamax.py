@@ -85,7 +85,11 @@ class NegamaxSolver:
                 return entry['value']
 
         if node.is_terminal():
-            return color * node.utility
+            if node.utility > 0:
+                terminal_value = node.utility + depth
+            else:
+                terminal_value = node.utility - depth
+            return color * terminal_value
 
         if depth == 0:
             return self._quiescence(node, alpha, beta, color)

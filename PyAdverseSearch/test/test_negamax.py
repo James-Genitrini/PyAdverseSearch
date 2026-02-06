@@ -83,7 +83,7 @@ def play_game(game_type):
 
     print("\n--- GAME OVER ---")
     winner = game.winner_function(state)
-    print(f"Result: {'It\'s a draw' if not winner else f'Winner is {winner}'}")
+    print(f"Result: {'Its a draw' if not winner else f'Winner is {winner}'}")
 
 
 if __name__ == "__main__":
