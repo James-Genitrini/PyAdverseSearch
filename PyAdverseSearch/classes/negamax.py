@@ -13,6 +13,7 @@ class NegamaxSolver:
         
         :param depth_limit: Profondeur maximale de l'arbre de recherche (nombre de demi-coups).
         """
+        
         self.depth_limit = depth_limit
         self.transposition_table = {}
 
@@ -28,6 +29,7 @@ class NegamaxSolver:
         :param root_node: Instance de Node représentant l'état actuel du jeu.
         :return: Le plateau (board) correspondant au meilleur coup trouvé.
         """
+        
         best_value = -float('inf')
         best_action = None
         
@@ -66,8 +68,15 @@ class NegamaxSolver:
         
         return self._negamax(root_node, self.depth_limit, -float('inf'), float('inf'), color)
 
+
+
     def _get_move_score(self, node, color):
-        """Calcule un score de priorité pour un nœud donné."""
+        """
+        :param node: Instance de Node à évaluer.
+        :param color: Multiplicateur (1 ou -1) selon le joueur actif.
+        :return: int/float représentant la priorité du coup.
+        """
+        
         score = 0
 
         if node.is_terminal():
@@ -92,6 +101,7 @@ class NegamaxSolver:
         :param color: Multiplicateur de score (1 ou -1) pour normaliser l'évaluation.
         :return: Le score évalué pour ce nœud du point de vue du joueur actuel.
         """
+        
         state_hash = hash(str(node.state.board)) 
         if state_hash in self.transposition_table:
             entry = self.transposition_table[state_hash]
@@ -140,6 +150,7 @@ class NegamaxSolver:
         :param color: Direction de l'évaluation.
         :return: Une évaluation stabilisée de la position.
         """
+        
         stand_pat = color * state._evaluate()
         
         if stand_pat >= beta: 
