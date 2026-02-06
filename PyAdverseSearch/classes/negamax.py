@@ -117,7 +117,7 @@ class NegamaxSolver:
         node.children.sort(key=lambda n: self._get_move_score(n, color), reverse=True)
 
         value = -float('inf')
-        for child in sorted_children:
+        for child in node.children:
             score = -self._negamax(child, depth - 1, -beta, -alpha, -color)
             value = max(value, score)
             alpha = max(alpha, value)
