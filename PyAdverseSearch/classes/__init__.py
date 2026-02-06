@@ -5,3 +5,4 @@ from .game import Game
 from .minimax import Minimax
 from .algorithm import SearchAlgorithm
 from .montecarlo import MonteCarlo
+from .negamax import NegamaxSolver
