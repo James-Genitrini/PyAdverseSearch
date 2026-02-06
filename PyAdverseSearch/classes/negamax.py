@@ -38,7 +38,7 @@ class NegamaxSolver:
             # On cherche pour l'adversaire (color = -1)
             # On suppose ici que la racine est toujours pour MAX (color 1)
             value = -self._negamax(child, self.depth_limit - 1, -float('inf'), float('inf'), -1)
-            
+
             if value > best_value:
                 best_value = value
                 best_action = child.state.board 
@@ -66,6 +66,20 @@ class NegamaxSolver:
         
         return self._negamax(root_node, self.depth_limit, -float('inf'), float('inf'), color)
 
+    def _get_move_score(self, node, color):
+        """Calcule un score de priorité pour un nœud donné."""
+        score = 0
+
+        if node.is_terminal():
+            if node.utility * color > 0: return 1000000
+            if node.utility == 0: return 0  # Nul
+            return -1000000  # Perdant
+
+        score += node.state._evaluate() * color
+
+        return score
+
+
 
     def _negamax(self, node, depth, alpha, beta, color):
         """
@@ -86,23 +100,21 @@ class NegamaxSolver:
 
         if node.is_terminal():
             if node.utility > 0:
-                terminal_value = node.utility + depth
+                adjusted_utility = node.utility + depth
+            elif node.utility < 0:
+                adjusted_utility = node.utility - depth
             else:
-                terminal_value = node.utility - depth
-            return color * terminal_value
+                adjusted_utility = 0
 
-        if depth == 0:
-            return self._quiescence(node, alpha, beta, color)
+            return color * adjusted_utility
+
+        if depth == 0 or node.is_terminal():
+            return self._quiescence(node.state, alpha, beta, color)
 
         if not node.children:
             node._expand()
 
-        # Move Ordering
-        sorted_children = sorted(
-            node.children,
-            key = lambda child: child.valuation * color,
-            reverse = True
-        )
+        node.children.sort(key=lambda n: self._get_move_score(n, color), reverse=True)
 
         value = -float('inf')
         for child in sorted_children:
@@ -117,7 +129,7 @@ class NegamaxSolver:
     
     
     
-    def _quiescence(self, node, alpha, beta, color):
+    def _quiescence(self, state, alpha, beta, color):
         """
         Recherche de 'calme' pour limiter l'effet d'horizon. 
         Continue d'explorer uniquement les captures pour éviter les erreurs d'évaluation 
@@ -128,13 +140,17 @@ class NegamaxSolver:
         :param color: Direction de l'évaluation.
         :return: Une évaluation stabilisée de la position.
         """
-        stand_pat = color * node.valuation
+        stand_pat = color * state._evaluate()
         
         if stand_pat >= beta: 
             return beta
         
         if alpha < stand_pat: 
             alpha = stand_pat
+
+        delta_margin = 10
+        if stand_pat < alpha - delta_margin:
+            return alpha
 
         actions = node.state._possible_actions()
         captures = [a for a in actions if getattr(a, 'is_capture', False)]
