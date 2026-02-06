@@ -79,9 +79,8 @@ def play_game(game_type):
         if not state or state._is_terminal():
             break
             
-        ai_turn = not ai_turn # Alterne le tour
+        ai_turn = not ai_turn
 
-    # Fin de partie
     print("\n--- GAME OVER ---")
     winner = game.winner_function(state)
     print(f"Result: {'It\'s a draw' if not winner else f'Winner is {winner}'}")
