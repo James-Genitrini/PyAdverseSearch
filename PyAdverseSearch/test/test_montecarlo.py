@@ -115,12 +115,111 @@ def test_montecarlo_vs_human_tictactoe():
             winner = game.winner_function(state)
             if not winner:
                 print("It's a draw!")
-            elif winner == "MAX":
-                print("MCTS AI (MAX) wins! (Comme prévu...)")
-            else:
-                print("You (MIN) win! (Bravo, c'est rare contre MCTS)")
+            if winner == "MAX":
+                if maxStarting: # AI is MAX
+                    print("MCTS win")
+                else: # Human is MAX
+                    print("You win")
+            else: # Winner is MIN
+                if maxStarting: # AI is MAX, so Human is MIN
+                    print("You win")
+                else: # AI is MIN
+                    print("MCTS win")
+            break
+
+
+from .state_connect4 import generate_connect4_game
+
+def test_montecarlo_vs_human_connect4():
+    print("=== TESTING MONTE CARLO (MCTS) AGAINST HUMAN PLAYER (CONNECT 4) ===")
+
+    # 1. Configuration du jeu
+    maxStarting = input("Would you like to start (y/n)? ")
+    if maxStarting == 'y':
+        maxStarting = False 
+    elif maxStarting == 'n':
+        maxStarting = True  
+    else:
+        print("Invalid input, defaulting to AI starts.")
+        maxStarting = True
+
+    game = generate_connect4_game(maxStarting)
+    state = game.state
+    print("Initial Board :")
+    state.display()
+
+    algorithm = MonteCarlo(game=game, max_iterations=5000)
+
+    move_count = 42 # Max moves in Connect 4
+    for i in range(move_count):
+        # Détermine à qui le tour
+        current_player_is_max = (i % 2 == 0) if maxStarting else (i % 2 != 0)
+        player_name = "Max (MCTS AI)" if current_player_is_max else "Your"
+
+        print(f"\n--- Move {i + 1} | {player_name} turn ---")
+
+        if current_player_is_max:
+            # --- TOUR DE L'IA (MCTS) ---
+            print("MCTS is thinking...")
+            start = time.time()
+
+            best_state = algorithm.choose_best_move(state)
+
+            end = time.time()
+
+            if best_state is None:
+                print("No move found (bug or end of game).")
+                break
+
+            print(f"AI played in {end - start:.3f} seconds.")
+            best_state.display()
+            state = best_state
+
+        else:
+            print("Here are all the possible moves you could do :")
+            possible_moves = state._generate_successors()
+
+            for j in range(len(possible_moves)):
+                print(f"Option {j + 1}:")
+                possible_moves[j].display()
+
+            while True:
+                user_input = input(f"Which one do you wish to do? (1-{len(possible_moves)}): ")
+                try:
+                    choice = int(user_input)
+                    if 1 <= choice <= len(possible_moves):
+                        state = possible_moves[choice - 1]
+                        state.display()
+                        break
+                    else:
+                        print(f"Invalid choice. 1 to {len(possible_moves)} please.")
+                except ValueError:
+                    print("Please enter a number.")
+
+        # 3. Vérification de fin de partie
+        if state._is_terminal():
+            print("\n--- GAME OVER ---")
+            winner = game.winner_function(state)
+            if not winner:
+                print("It's a draw!")
+            if winner == "MAX":
+                if maxStarting: 
+                    print("MCTS win")
+                else: 
+                    print("You win")
+            else: 
+                if maxStarting: 
+                    print("You win")
+                else:
+                    print("MCTS win")
             break
 
 
 if __name__ == "__main__":
-    test_montecarlo_vs_human_tictactoe()
+    game_choice = input("TicTacToe or Connect 4 ? (t or c) : ")
+    if game_choice == "t":
+        test_montecarlo_vs_human_tictactoe()
+    elif game_choice == "c":
+        test_montecarlo_vs_human_connect4()
+    else:
+        print("No game chosen.")

@@ -153,4 +153,4 @@ if __name__ == "__main__":
     game = input("TicTacToe or Connect 4 ? (t or c) : ")
     if game == "t" : test_minimax_vs_human_tictactoe()
     elif game == "c" : test_minimax_vs_human_connect4()
-    else : print("No game choosen.")
+    else : print("No game chosen.")

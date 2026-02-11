@@ -39,10 +39,8 @@ def winner_function(state):
 def test_mcts_min_logic():
     print("\n=== TEST: MCTS Minimization for MIN ===")
     # Root (MIN to move)
-    #  |
-    #  +-- Child A (Terminal, Utility = 100 (MAX wins))
-    #  |
-    #  +-- Child B (Terminal, Utility = -100 (MIN wins))
+    # Child A (Terminal, Utility = 100 (MAX wins))
+    # Child B (Terminal, Utility = -100 (MIN wins))
 
     game_obj = Game(isMaxStarting=True)
     root_state = MockState("Root", "MIN", game=game_obj)
