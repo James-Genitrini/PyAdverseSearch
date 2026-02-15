@@ -27,6 +27,9 @@ def choose_best_move(algo_name, game, state, **kwargs):
     elif algo_name == 'montecarlo':
         from .montecarlo import MonteCarlo
         AlgoClass = MonteCarlo
+    elif algo_name == 'pnsearch':
+        from .pnsearch import PNSearch
+        AlgoClass = PNSearch
     else:
         raise ValueError(f"Algorithme inconnu : {algo_name}")
 
