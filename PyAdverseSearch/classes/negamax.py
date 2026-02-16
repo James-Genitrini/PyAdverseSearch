@@ -28,6 +28,17 @@ class NegamaxSolver:
 
 
     def get_best_move(self, root_node):
+        """
+        Détermine le meilleur coup à partir du nœud racine donné.
+
+        Explore tous les enfants du nœud racine en utilisant l'algorithme
+        Negamax avec élagage Alpha-Beta, puis sélectionne l'action
+        produisant la meilleure valeur d'évaluation.
+
+        :param root_node: Nœud racine représentant l'état actuel du jeu.
+        :return: La représentation du plateau (board) correspondant
+                au meilleur coup trouvé.
+        """
         best_value = -float('inf')
         best_action = None
         
@@ -48,6 +59,20 @@ class NegamaxSolver:
     
     
     def _get_evaluation(self, node, color):
+        """
+        Évalue numériquement un nœud donné.
+
+        Si le nœud est terminal, retourne sa valeur utilité pondérée
+        par la profondeur pour favoriser les victoires rapides et
+        retarder les défaites.
+
+        Sinon, utilise la fonction d'évaluation heuristique définie
+        dans l'état du jeu si disponible.
+
+        :param node: Nœud à évaluer.
+        :param color: 1 pour MAX, -1 pour MIN.
+        :return: Score numérique de la position.
+        """
         if node.is_terminal():
             return color * (node.utility + (node.depth if node.utility > 0 else -node.depth))
         
@@ -62,13 +87,16 @@ class NegamaxSolver:
     
     def solve(self, game, state, color):
         """
-        Point d'entrée alternatif pour évaluer la valeur d'un état spécifique.
-        Réinitialise la table de transposition pour garantir une recherche fraîche.
-        
-        :param game: Instance de la classe Game.
-        :param state: L'état à évaluer.
-        :param color: 1 pour le joueur MAX, -1 pour le joueur MIN.
-        :return: Valeur numérique de l'état.
+        Évalue la valeur d'un état donné indépendamment de la recherche
+        d'un meilleur coup.
+
+        Cette méthode réinitialise la table de transposition afin de garantir
+        une recherche propre, puis lance l'algorithme Negamax depuis l'état fourni.
+
+        :param game: Instance du jeu.
+        :param state: État à évaluer.
+        :param color: 1 si le joueur courant est MAX, -1 si MIN.
+        :return: Valeur numérique estimée de l'état.
         """
         self.transposition_table = {}
         
@@ -82,7 +110,19 @@ class NegamaxSolver:
 
 
     def _get_move_score(self, node, color):
-        """Priorise les nœuds pour l'élagage Alpha-Beta (Move Ordering)"""
+        """
+        Calcule un score heuristique pour ordonner les coups.
+
+        Cette méthode est utilisée pour améliorer l'efficacité
+        de l'élagage Alpha-Beta en explorant d'abord les coups
+        potentiellement les plus prometteurs.
+
+        Les positions terminales favorables sont priorisées.
+
+        :param node: Nœud enfant à évaluer.
+        :param color: 1 pour MAX, -1 pour MIN.
+        :return: Score heuristique utilisé pour le tri des coups.
+        """
         if node.is_terminal():
             if node.utility * color > 0:
                 return 100000
@@ -94,6 +134,24 @@ class NegamaxSolver:
 
 
     def _negamax(self, node, depth, alpha, beta, color):
+        """
+        Implémentation récursive de l'algorithme Negamax avec élagage Alpha-Beta.
+
+        Explore récursivement l'arbre des coups possibles en alternant
+        les perspectives des joueurs via l'inversion du signe (principe Negamax).
+
+        Inclut :
+        - Élagage Alpha-Beta pour réduire l'espace de recherche
+        - Table de transposition pour éviter les recalculs
+        - Recherche de quiescence lorsque la profondeur maximale est atteinte
+
+        :param node: Nœud courant.
+        :param depth: Profondeur restante à explorer.
+        :param alpha: Borne inférieure (meilleure valeur garantie pour MAX).
+        :param beta: Borne supérieure (meilleure valeur garantie pour MIN).
+        :param color: 1 pour MAX, -1 pour MIN.
+        :return: Meilleure valeur trouvée pour ce nœud.
+        """
         self.nodes_visited += 1
 
         state_hash = hash(node.state) if hasattr(node.state, '__hash__') else hash(str(node.state.board))
@@ -129,16 +187,24 @@ class NegamaxSolver:
     
     def _quiescence(self, node, alpha, beta, color):
         """
-        Recherche de 'calme' pour limiter l'effet d'horizon. 
-        Continue d'explorer uniquement les captures pour éviter les erreurs d'évaluation 
-        grossières sur le dernier coup.
-        
-        :param node: Le nœud à évaluer.
-        :param alpha/beta: Bornes d'élagage.
-        :param color: Direction de l'évaluation.
-        :return: Une évaluation stabilisée de la position.
+        Effectue une recherche de quiescence pour stabiliser l'évaluation
+        en fin de profondeur.
+
+        Permet de limiter l'effet d'horizon en continuant d'explorer
+        uniquement les coups tactiques (captures) susceptibles de
+        modifier significativement l'évaluation.
+
+        Applique également :
+        - Stand pat evaluation
+        - Élagage Alpha-Beta
+        - Delta pruning pour limiter les explorations inutiles
+
+        :param node: Nœud à analyser.
+        :param alpha: Borne inférieure.
+        :param beta: Borne supérieure.
+        :param color: 1 pour MAX, -1 pour MIN.
+        :return: Score stabilisé de la position.
         """
-        
         if hasattr(node.state, '_evaluate'):
             stand_pat = color * node.state._evaluate()
         else:
