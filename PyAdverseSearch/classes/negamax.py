@@ -9,6 +9,8 @@ class NegamaxSolver:
     Cette variante simplifiée du Minimax repose sur l'égalité : max(a, b) == -min(-a, -b).
     Elle permet de traiter les deux joueurs avec la même logique de maximisation.
     """
+
+
     
     def __init__(self, depth_limit=5):
         """
@@ -23,33 +25,38 @@ class NegamaxSolver:
         self.nodes_visited = 0
         self.cutoffs = 0
 
+
+
     def get_best_move(self, root_node):
-        """
-        Analyse la racine du jeu et retourne l'état (board) résultant du meilleur coup possible.
-        
-        Cette fonction amorce la récursion en explorant les enfants directs de la racine 
-        et en sélectionnant celui qui offre le score Negamax le plus élevé.
-        
-        :param root_node: Instance de Node représentant l'état actuel du jeu.
-        :return: Le plateau (board) correspondant au meilleur coup trouvé.
-        """
-        
         best_value = -float('inf')
         best_action = None
+        
+        current_color = 1 if root_node.state.player == 'MAX' else -1
         
         if not root_node.children:
             root_node._expand()
             
         for child in root_node.children:
-            # On cherche pour l'adversaire (color = -1)
-            # On suppose ici que la racine est toujours pour MAX (color 1)
-            value = -self._negamax(child, self.depth_limit - 1, -float('inf'), float('inf'), -1)
+            value = -self._negamax(child, self.depth_limit - 1, -float('inf'), float('inf'), -current_color)
 
             if value > best_value:
                 best_value = value
                 best_action = child.state.board 
         
         return best_action
+    
+    
+    
+    def _get_evaluation(self, node, color):
+        if node.is_terminal():
+            return color * (node.utility + (node.depth if node.utility > 0 else -node.depth))
+        
+        if hasattr(node.state, 'evaluate'):
+            return color * node.state.evaluate()
+        if hasattr(node.state, '_evaluate'):
+            return color * node.state._evaluate()
+        
+        return 0
     
     
     
@@ -75,62 +82,35 @@ class NegamaxSolver:
 
 
     def _get_move_score(self, node, color):
-        """
-        :param node: Instance de Node à évaluer.
-        :param color: Multiplicateur (1 ou -1) selon le joueur actif.
-        :return: int/float représentant la priorité du coup.
-        """
-        
-        score = 0
-
+        """Priorise les nœuds pour l'élagage Alpha-Beta (Move Ordering)"""
         if node.is_terminal():
-            if node.utility * color > 0: return 1000000
-            if node.utility == 0: return 0  # Nul
-            return -1000000  # Perdant
-
-        score += node.state._evaluate() * color
-
-        return score
+            if node.utility * color > 0:
+                return 100000
+            else:
+                return -100000
+        
+        return self._get_evaluation(node, color)
 
 
 
     def _negamax(self, node, depth, alpha, beta, color):
-        """
-        Fonction récursive principale implémentant Negamax avec élagage Alpha-Beta.
-        
-        :param node: Le nœud (Node) actuellement exploré.
-        :param depth: Profondeur restante à explorer.
-        :param alpha: Borne inférieure du score sécurisé par le joueur actuel.
-        :param beta: Borne supérieure du score que l'adversaire laissera au joueur actuel.
-        :param color: Multiplicateur de score (1 ou -1) pour normaliser l'évaluation.
-        :return: Le score évalué pour ce nœud du point de vue du joueur actuel.
-        """
-        
         self.nodes_visited += 1
 
-        state_hash = hash(str(node.state.board)) 
+        state_hash = hash(node.state) if hasattr(node.state, '__hash__') else hash(str(node.state.board))
+        
         if state_hash in self.transposition_table:
             entry = self.transposition_table[state_hash]
             if entry['depth'] >= depth:
                 return entry['value']
 
-        if node.is_terminal():
-            if node.utility > 0:
-                adjusted_utility = node.utility + depth
-            elif node.utility < 0:
-                adjusted_utility = node.utility - depth
-            else:
-                adjusted_utility = 0
-
-            return color * adjusted_utility
-
-        if depth == 0 or node.is_terminal():
-            return self._quiescence(node, alpha, beta, color)
+        if node.is_terminal() or depth == 0:
+            if depth == 0 and hasattr(node.state, '_possible_captures'):
+                return self._quiescence(node, alpha, beta, color)
+            return self._get_evaluation(node, color)
 
         if not node.children:
             node._expand()
 
-        # random.shuffle(node.children)
         node.children.sort(key=lambda n: self._get_move_score(n, color), reverse=True)
 
         value = -float('inf')
