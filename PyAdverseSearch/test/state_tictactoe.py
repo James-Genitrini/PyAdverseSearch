@@ -37,6 +37,26 @@ class TicTacToeState(State):
         child = TicTacToeState(new_board, next_player, parent=self, game=self.game)
         return child
 
+    def get_possible_moves(self):
+        """Returns a list of available (row, col) moves on the board."""
+        return possible_actions(self)
+
+    def is_game_over(self):
+        """Checks if the game has ended."""
+        return is_terminal(self)
+
+    def get_utility(self):
+        """Returns the utility value for terminal states."""
+        return utility(self)
+
+    def get_winner(self):
+        """Returns the winner if game is over."""
+        return winner_function(self)
+
+    def evaluate(self):
+        """Returns heuristic evaluation of the state."""
+        return heuristic(self)
+
 
 def possible_actions(state):
     """

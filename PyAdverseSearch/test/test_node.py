@@ -6,7 +6,7 @@ from ..classes.state import State
 class MockState(State):
     def __init__(self, game, player=None):
         self.game = game
-        self.player = player # Simulate state knowing the player
+        self.player = player 
     def _possible_actions(self): return []
     def _is_terminal(self): return False
     def _utility(self): return 0
@@ -36,10 +36,6 @@ def test_node_player_logic():
         print(f"Depth {depth}: Got {node.player}, Expected {expected} -> {status}")
 
     print("\n=== TEST 3: State Override (MCTS Scenario) ===")
-    # Scenario: We are at depth 0 of the search tree.
-    # The buggy logic says it's MIN's turn at depth 0 (if MAX starts).
-    # But let's say the state explicitly says it's MAX's turn.
-    # If Node respects the state, it should say MAX. If it uses the buggy logic, it will say MIN.
     game_override = Game(isMaxStarting=True) 
     state_override = MockState(game_override, player="MAX") 
     

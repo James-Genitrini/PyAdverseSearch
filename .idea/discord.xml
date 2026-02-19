@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DiscordProjectSettings">
+<<<<<<< HEAD
     <option name="show" value="ASK" />
     <option name="description" value="" />
     <option name="applicationTheme" value="default" />
@@ -10,5 +11,9 @@
     <option name="button2Title" value="" />
     <option name="button2Url" value="" />
     <option name="customApplicationId" value="" />
+=======
+    <option name="show" value="PROJECT_FILES" />
+    <option name="description" value="" />
+>>>>>>> 8f8a2bd7f291c0a7e78b1f7ea60f05c4ed1d7d38
   </component>
 </project>
