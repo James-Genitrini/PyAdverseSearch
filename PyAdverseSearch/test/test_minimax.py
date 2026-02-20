@@ -4,6 +4,7 @@
 
 from .state_tictactoe import generate_tictactoe_game
 from .state_connect4 import generate_connect4_game
+from .Chess.state_chess import generate_chess_game
 from PyAdverseSearch.classes.minimax import Minimax 
 import time
 
@@ -149,8 +150,89 @@ def test_minimax_vs_human_connect4() :
             break
 
 
+"""
+
+CHESS
+
+"""
+
+def test_minimax_vs_human_chess():
+    print("TESTING MINIMAX AGAINST HUMAN PLAYER (CHESS)")
+    maxStarting = input("Would you like to start (y/n)? ")
+    if maxStarting == 'y':
+        maxStarting = False
+    elif maxStarting == 'n':
+        maxStarting = True
+    else:
+        print("Answer didn't match 'y' or 'n', program ended...")
+        return
+    game = generate_chess_game(maxStarting)
+    state = game.state
+    print("Initial Board :")
+    state.display()
+
+    for i in range(20):
+        user_input = input(f"Which move do you wish to do? (in format 'e2e4' to move piece from e2 to e4): ")
+
+        try:
+            if 4 == len(user_input):
+                from_coord = user_input[0:2]
+                to_coord = user_input[2:4]
+                state.board.move_piece(from_coord, to_coord)
+                state.display()
+            elif 5 == len(user_input):
+                from_coord = user_input[0:2]
+                to_coord = user_input[2:4]
+                promotion_piece = user_input[4]
+                state.board.promote_pawn(from_coord, to_coord, promotion_piece)
+                state.display()
+            else:
+                #print(f"Invalid input! Please enter a number between 1 and {len(possible_moves)}.") 
+                print(str(user_input) + " : incorrect move or let king in check")
+        except ValueError as error:
+            print(str(error))
+        
+
+def test_minimax_vs_human_chessIA():
+    print("TESTING MINIMAX AGAINST HUMAN PLAYER (CHESS)")
+    maxStarting = input("Would you like to start (y/n)? ")
+    if maxStarting == 'y':
+        maxStarting = False
+    elif maxStarting == 'n':
+        maxStarting = True
+    else:
+        print("Answer didn't match 'y' or 'n', program ended...")
+        return
+    game = generate_chess_game(maxStarting)
+    state = game.state
+    print("Initial Board :")
+    state.display()
+
+    for i in range(20):
+        user_input = input(f"Which move do you wish to do? (in format 'e2e4' to move piece from e2 to e4): ")
+
+        try:
+            if 4 == len(user_input):
+                from_coord = user_input[0:2]
+                to_coord = user_input[2:4]
+                state.board.move_piece(from_coord, to_coord)
+                state.display()
+            elif 5 == len(user_input):
+                from_coord = user_input[0:2]
+                to_coord = user_input[2:4]
+                promotion_piece = user_input[4]
+                state.board.promote_pawn(from_coord, to_coord, promotion_piece)
+                state.display()
+            else:
+                #print(f"Invalid input! Please enter a number between 1 and {len(possible_moves)}.") 
+                print(str(user_input) + " : incorrect move or let king in check")
+        except ValueError as error:
+            print(str(error))
+
+
 if __name__ == "__main__":
-    game = input("TicTacToe or Connect 4 ? (t or c) : ")
+    game = input("TicTacToe or Connect 4 or Chess ? (t or c or C) : ")
     if game == "t" : test_minimax_vs_human_tictactoe()
     elif game == "c" : test_minimax_vs_human_connect4()
+    elif game == "C" : test_minimax_vs_human_chess()
     else : print("No game chosen.")
