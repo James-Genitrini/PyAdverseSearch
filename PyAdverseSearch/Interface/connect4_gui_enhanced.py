@@ -122,11 +122,11 @@ class Connect4GUI:
 
     def start_game(self):
         if self.start_choice.get() == "human":
-            self.human_is_max = False
-            max_starting = False
-        else:
             self.human_is_max = True
             max_starting = True
+        else:
+            self.human_is_max = False
+            max_starting = False
 
         self.game = generate_connect4_game(max_starting)
         self.state = self.game.state
