@@ -369,20 +369,6 @@ class ReversiWindow(arcade.Window):
                     self.play_turn()  # lancer la boucle automatique après coup humain
                     return
 
-    def ai_move(self):
-        possible_moves = self.state.get_possible_moves()
-        # Si IA ne peut pas jouer, PASS automatique
-        if possible_moves == [None]:
-            self.state = self.state._apply_action(None)
-            return
-
-        best_state = self.minimax.choose_best_move(self.state)
-
-        if best_state is None:
-            return
-
-        self.state = best_state
-
     def play_turn(self):
         while not self.state.is_game_over():
             possible_moves = self.state.get_possible_moves()
@@ -506,3 +492,4 @@ if __name__ == "__main__":
     play_console()
 
 """
+
