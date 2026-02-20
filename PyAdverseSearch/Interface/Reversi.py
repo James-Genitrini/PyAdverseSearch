@@ -416,7 +416,7 @@ if __name__ == "__main__":
 
 
 """
-# --- Console Version (sans interface graphique) ---
+# --- Version Console (sans interface graphique) ---
 def print_board(state):
     board = state.board
     moves = state.get_possible_moves()
@@ -504,4 +504,5 @@ def play_console():
 
 if __name__ == "__main__":
     play_console()
+
 """
