@@ -22,6 +22,8 @@
 
 [Tests unitaires complets](#9---tests-unitaires-complets)
 
+[Documentation Sphinx](#10---documentation-sphinx)
+
 [Conclusion](#conclusion)
 
 
@@ -407,6 +409,134 @@ test_full_game_next_move.py : joue une partie complète en alternant IA et coups
 
 Tous ces tests permettent de s'assurer que les modules du projet restent fonctionnels même après modifications.
 
+
+
+## 10 - Documentation Sphinx
+
+PyAdverseSearch dispose d'une documentation technique complète générée avec **Sphinx** et le thème `sphinx-rtd-theme`. Elle couvre l'intégralité des classes, algorithmes et interfaces graphiques du projet.
+
+### Accès rapide à la documentation
+
+La documentation est déjà pré-générée dans le dépôt. Il suffit d'ouvrir directement ce fichier dans un navigateur :
+
+    docs/_build/html/index.html
+
+Sous Windows via PowerShell :
+
+    Start-Process "docs\_build\html\index.html"
+
+Aucune installation supplémentaire n'est nécessaire pour consulter la documentation existante.
+
+---
+
+### Regénérer la documentation (optionnel)
+
+Les étapes ci-dessous sont uniquement nécessaires si vous souhaitez regénérer la documentation après avoir modifié le code source.
+
+### Prérequis
+
+Les dépendances nécessaires sont déjà incluses dans l'environnement virtuel du projet. Pour les installer manuellement :
+
+    pip install sphinx sphinx-rtd-theme sphinx-autodoc-typehints
+
+### Structure de la documentation
+
+    docs/
+    ├── conf.py              # Configuration Sphinx
+    ├── index.rst            # Page d'accueil
+    ├── about.rst            # Informations sur le projet
+    ├── Makefile             # Build Unix/macOS
+    ├── make.bat             # Build Windows
+    ├── _static/
+    │   └── custom.css       # Personnalisation CSS
+    ├── classes/
+    │   ├── index.rst
+    │   ├── algorithm.rst    # SearchAlgorithm (classe de base)
+    │   ├── game.rst         # Game
+    │   ├── state.rst        # State (classe abstraite)
+    │   ├── node.rst         # Node
+    │   ├── tree.rst         # GameTree
+    │   ├── minimax.rst      # Minimax
+    │   ├── alphabeta.rst    # AlphaBeta
+    │   ├── negamax.rst      # NegamaxSolver
+    │   ├── montecarlo.rst   # MonteCarlo (MCTS)
+    │   ├── mtdf.rst         # MTDf
+    │   ├── pnsearch.rst     # PNSearch
+    │   └── autosolver.rst   # AutoSolver
+    └── interface/
+        ├── index.rst
+        ├── connect4_gui.rst          # Interface Puissance 4 basique
+        ├── connect4_gui_enhanced.rst # Interface Puissance 4 complète
+        ├── tictactoe_gui.rst         # Interface Morpion
+        ├── reversi.rst               # Interface Reversi (Arcade)
+        └── pdf_report.rst            # Générateur de rapport PDF
+
+### Générer la documentation HTML
+
+**Sur Windows :**
+
+    cd docs
+    .\make.bat html
+
+Ou directement via Python (recommandé dans un environnement virtuel) :
+
+    cd docs
+    python -m sphinx -b html . _build/html
+
+**Sur Linux / macOS :**
+
+    cd docs
+    make html
+
+
+### Autres formats disponibles
+
+Sphinx supporte plusieurs formats de sortie :
+
+| Commande              | Format produit          |
+|-----------------------|-------------------------|
+| `make html`           | Site web HTML           |
+| `make latexpdf`       | PDF via LaTeX           |
+| `make epub`           | Livre numérique EPUB    |
+| `make text`           | Texte brut              |
+| `make linkcheck`      | Vérification des liens  |
+
+### Ajouter de la documentation
+
+Pour documenter une nouvelle classe ou un nouveau module :
+
+1. Ajouter des docstrings au format Sphinx (`:param:`, `:type:`, `:return:`, `:rtype:`) dans le fichier Python.
+2. Créer un fichier `.rst` dans `docs/classes/` ou `docs/interface/` :
+
+        .. Ma nouvelle classe
+        Mon titre
+        =========
+
+        .. automodule:: PyAdverseSearch.classes.ma_classe
+           :members:
+           :undoc-members:
+           :show-inheritance:
+
+3. Référencer ce fichier dans le `toctree` du fichier `index.rst` parent.
+4. Relancer `make html`.
+
+### Conventions de docstrings
+
+Le projet utilise le style Sphinx natif (`:param:` / `:type:` / `:return:`) :
+
+    def ma_methode(self, state, depth):
+        """
+        Description courte.
+
+        Description longue optionnelle.
+
+        :param state: État courant du jeu.
+        :type state: State
+        :param depth: Profondeur restante.
+        :type depth: int
+        :return: Valeur évaluée.
+        :rtype: float
+        """
 
 
 ## Conclusion

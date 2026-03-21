@@ -10,11 +10,12 @@ class MTDf(SearchAlgorithm):
     MTD(f) - Memory-enhanced Test Driver.
 
     Corrections apportees :
-    - MTDf appelle _alpha_beta_tt sur la RACINE (pas sur chaque enfant)
+
+    - MTDf appelle ``_alpha_beta_tt`` sur la RACINE (pas sur chaque enfant)
     - Le first-guess est la valeur exacte rendue par la profondeur d-1
     - La TT est conservee entre les profondeurs de l'iterative deepening
     - Move ordering : center-bias Puissance 4 + score heuristique
-      sans double _apply_action (les enfants sont calcules une seule fois)
+      sans double ``_apply_action`` (les enfants sont calcules une seule fois)
     - Killer moves : memorise les actions qui ont produit des coupures
 
     Reference: Aske Plaat et al. "MTD(f), a new chess algorithm" (1996)

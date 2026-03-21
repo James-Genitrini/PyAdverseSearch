@@ -1,15 +1,19 @@
 # FILE: PyAdverseSearch/classes/autosolver.py
 
 """
+Module autosolver
+=================
+
 AutoSolver - Selecteur automatique d'algorithmes pour les jeux adversariaux.
 
 Deux modes disponibles :
-- "classic" : utilise tous les algorithmes disponibles de facon intelligente
-              selon la phase de jeu (debut / milieu / fin).
-- "fast"    : utilise uniquement les algorithmes les plus rapides
-              (MTD(f) avec iterative deepening + PN-Search en fin de partie).
 
-Chaque appel a choose_best_move enregistre des statistiques sur l'algorithme
+- ``"classic"`` : utilise tous les algorithmes disponibles de facon intelligente
+  selon la phase de jeu (debut / milieu / fin).
+- ``"fast"`` : utilise uniquement les algorithmes les plus rapides
+  (MTD(f) avec iterative deepening + PN-Search en fin de partie).
+
+Chaque appel a ``choose_best_move`` enregistre des statistiques sur l'algorithme
 utilise, la raison du choix et les performances mesurees.
 """
 
