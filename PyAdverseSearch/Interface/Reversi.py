@@ -1,4 +1,6 @@
 import arcade
+import time
+import tkinter as tk
 
 from PyAdverseSearch.classes.state import State
 from PyAdverseSearch.classes.game import Game
@@ -216,6 +218,137 @@ def generate_reversi_game(isMaxStartingParameter=True):
 
     return game
 
+class ReversiWindow:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Reversi - IA")
+
+        self.canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT + UI_HEIGHT, bg="darkgreen")
+        self.canvas.pack()
+
+        self.game = generate_reversi_game()
+        self.state = self.game.state
+        self.minimax = Minimax(self.game, max_depth=3)
+
+        self.human_player = 'MAX'
+        self.ai_player = 'MIN'
+
+        # Boutons
+        self.restart_btn = tk.Button(root, text="Rejouer", command=self.restart_game)
+        self.quit_btn = tk.Button(root, text="Quitter", command=root.quit)
+
+        self.restart_btn.pack(side="left", padx=20, pady=10)
+        self.quit_btn.pack(side="right", padx=20, pady=10)
+
+        # Clic souris
+        self.canvas.bind("<Button-1>", self.on_mouse_press)
+
+        self.draw()
+
+    def draw(self):
+        self.canvas.delete("all")
+
+        # Plateau
+        for r in range(SIZE):
+            for c in range(SIZE):
+                x1 = c * CELL
+                y1 = r * CELL
+                x2 = x1 + CELL
+                y2 = y1 + CELL
+
+                self.canvas.create_rectangle(x1, y1, x2, y2, fill="green", outline="black")
+
+                cell = self.state.board[r][c]
+
+                if cell == 'B':
+                    self.canvas.create_oval(x1+5, y1+5, x2-5, y2-5, fill="black")
+                elif cell == 'W':
+                    self.canvas.create_oval(x1+5, y1+5, x2-5, y2-5, fill="white")
+
+        # Coups possibles
+        if self.state.player == self.human_player:
+            for move in self.state.get_possible_moves():
+                if move:
+                    r, c = move
+                    x = c * CELL + CELL//2
+                    y = r * CELL + CELL//2
+                    self.canvas.create_oval(x-3, y-3, x+3, y+3, fill="gray")
+
+        # Fin de partie
+        if self.state.is_game_over():
+            winner = self.state.get_winner()
+
+            if winner == 'MAX':
+                text = "NOIR GAGNE"
+            elif winner == 'MIN':
+                text = "BLANC GAGNE"
+            else:
+                text = "MATCH NUL"
+
+            self.canvas.create_text(WIDTH//2, HEIGHT//2, text=text, fill="white", font=("Arial", 20))
+
+    def on_mouse_press(self, event):
+        if self.state.is_game_over():
+            return
+
+        if self.state.player == self.human_player:
+            c = event.x // CELL
+            r = event.y // CELL
+
+            for move in self.state.get_possible_moves():
+                if move and move == (r, c):
+                    self.state = self.state._apply_action(move)
+
+                    self.draw()
+                    self.root.after(3000, self.play_turn)
+
+                    return
+
+    def play_turn(self):
+        if self.state.is_game_over():
+            self.draw()
+            return
+
+        moves = self.state.get_possible_moves()
+
+        # PASS automatique
+        if moves == [None]:
+            self.state = self.state._apply_action(None)
+            self.draw()
+            self.root.after(3000, self.play_turn)
+            return
+
+        # Tour IA
+        if self.state.player == self.ai_player:
+            best_state = self.minimax.choose_best_move(self.state)
+
+            if best_state is None:
+                self.state = self.state._apply_action(None)
+            else:
+                self.state = best_state
+
+            self.draw()
+
+            self.root.after(3000, self.play_turn)
+            return
+
+        # Tour humain → on attend
+        self.draw()
+
+    def restart_game(self):
+        self.game = generate_reversi_game()
+        self.state = self.game.state
+        self.minimax = Minimax(self.game, max_depth=3)
+        self.draw()
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ReversiWindow(root)
+    root.mainloop()
+
+"""
+"Version Arcade (interface graphique plus avancée) - nécessite la bibliothèque 'arcade' installée"
 class ReversiWindow(arcade.Window):
     def __init__(self):
         super().__init__(WIDTH, HEIGHT + UI_HEIGHT, "Reversi - IA")
@@ -398,7 +531,7 @@ class ReversiWindow(arcade.Window):
 if __name__ == "__main__":
     window = ReversiWindow()
     arcade.run()
-    
+"""
 
 
 """
@@ -490,6 +623,4 @@ def play_console():
 
 if __name__ == "__main__":
     play_console()
-
 """
-
