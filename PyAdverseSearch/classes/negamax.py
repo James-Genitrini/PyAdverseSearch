@@ -12,12 +12,13 @@ class NegamaxSolver:
 
 
     
-    def __init__(self, depth_limit=5):
+    def __init__(self, depth_limit=5, tracer=None):
         """
         Initialise le solveur avec une limite de profondeur de recherche.
         
         :param depth_limit: Profondeur maximale de l'arbre de recherche (nombre de demi-coups).
         """
+        self.tracer = tracer
         
         self.depth_limit = depth_limit
         self.transposition_table = {}
@@ -152,6 +153,8 @@ class NegamaxSolver:
         :param color: 1 pour MAX, -1 pour MIN.
         :return: Meilleure valeur trouvée pour ce nœud.
         """
+        if self.tracer: 
+            self.tracer.enter_node(node, alpha, beta, color)
         self.nodes_visited += 1
 
         state_hash = hash(node.state) if hasattr(node.state, '__hash__') else hash(str(node.state.board))
@@ -177,10 +180,14 @@ class NegamaxSolver:
             value = max(value, score)
             alpha = max(alpha, value)
             if alpha >= beta:
+                if self.tracer: 
+                    self.tracer.report_cutoff()
                 self.cutoffs += 1
                 break
 
         self.transposition_table[state_hash] = {'value': value, 'depth': depth}
+        if self.tracer: 
+            self.tracer.exit_node(value)
         return value
     
     
