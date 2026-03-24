@@ -40,20 +40,32 @@ class NegamaxSolver:
         :return: La représentation du plateau (board) correspondant
                 au meilleur coup trouvé.
         """
-        best_value = -float('inf')
-        best_action = None
-        
+        if root_node.is_terminal():
+            raise ValueError("get_best_move appelé sur un état terminal.")
+
         current_color = 1 if root_node.state.player == 'MAX' else -1
-        
+                
         if not root_node.children:
             root_node._expand()
-            
-        for child in root_node.children:
-            value = -self._negamax(child, self.depth_limit - 1, -float('inf'), float('inf'), -current_color)
+        
+        if not root_node.children:
+            raise ValueError("Aucun coup légal depuis cet état.")
 
+        best_value = -float('inf')
+        best_action = None
+
+        for child in root_node.children:
+            value = -self._negamax(
+                child,
+                self.depth_limit - 1,
+                -float('inf'),
+                float('inf'),
+                -current_color
+            )
+            
             if value > best_value:
                 best_value = value
-                best_action = child.state.board 
+                best_action = child.state.board
         
         return best_action
     
@@ -79,8 +91,6 @@ class NegamaxSolver:
         
         if hasattr(node.state, 'evaluate'):
             return color * node.state.evaluate()
-        if hasattr(node.state, '_evaluate'):
-            return color * node.state._evaluate()
         
         return 0
     
