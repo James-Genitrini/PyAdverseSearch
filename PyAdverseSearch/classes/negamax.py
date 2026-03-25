@@ -53,7 +53,8 @@ class NegamaxSolver:
 
         best_value = -float('inf')
         best_action = None
-
+        best_child = None
+        
         for child in root_node.children:
             value = -self._negamax(
                 child,
@@ -66,7 +67,11 @@ class NegamaxSolver:
             if value > best_value:
                 best_value = value
                 best_action = child.state.board
-        
+                best_child = child
+                
+        if self.tracer and best_child is not None:
+            self.tracer.report_best_move(id(best_child), best_value)
+
         return best_action
     
     
